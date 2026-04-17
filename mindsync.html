@@ -4,1215 +4,785 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MindSync - AI-Powered Student Wellness</title>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/recharts@2.5.0/dist/Recharts.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        :root {
-            --bg-primary: #FFFFFF;
-            --bg-secondary: #F8F9FA;
-            --bg-tertiary: #EEF2F6;
-            --text-primary: #1A1A1A;
-            --text-secondary: #6B7280;
-            --text-tertiary: #9CA3AF;
-            --border-color: #E5E7EB;
-            --accent-purple: #7C3AED;
-            --accent-purple-light: #A78BFA;
-            --accent-teal: #14B8A6;
-            --accent-teal-light: #5EEAD4;
-            --accent-coral: #F97316;
-            --danger-bg: #FEE2E2;
-            --danger-text: #DC2626;
-            --success-bg: #D1FAE5;
-            --success-text: #059669;
-            --warning-bg: #FEF3C7;
-            --warning-text: #D97706;
-            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
-            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        [data-theme="dark"] {
-            --bg-primary: #111827;
-            --bg-secondary: #1F2937;
-            --bg-tertiary: #374151;
-            --text-primary: #F9FAFB;
-            --text-secondary: #D1D5DB;
-            --text-tertiary: #9CA3AF;
-            --border-color: #374151;
-            --accent-purple: #A78BFA;
-            --accent-purple-light: #C4B5FD;
-            --accent-teal: #5EEAD4;
-            --accent-teal-light: #99F6E4;
-            --accent-coral: #FB923C;
-            --danger-bg: #7F1D1D;
-            --danger-text: #FCA5A5;
-            --success-bg: #064E3B;
-            --success-text: #6EE7B7;
-            --warning-bg: #78350F;
-            --warning-text: #FCD34D;
-            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
-            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            line-height: 1.6;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             transition: background 0.3s ease, color 0.3s ease;
         }
 
-        #root {
-            min-height: 100vh;
+        body.light-mode {
+            background: linear-gradient(135deg, #A7C7E7 0%, #E8D5E8 50%, #FFE5D9 100%);
         }
 
-        .app-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0;
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
         }
 
-        .header {
-            background: var(--bg-primary);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--accent-purple);
-        }
-
-        .logo-icon {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--accent-purple), var(--accent-teal));
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.2rem;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .theme-toggle {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 0.5rem 0.75rem;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: all 0.2s;
-        }
-
-        .theme-toggle:hover {
-            background: var(--bg-tertiary);
-            transform: scale(1.05);
-        }
-
-        .nav-tabs {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .nav-tab {
-            background: transparent;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.95rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-            transition: all 0.2s;
-        }
-
-        .nav-tab:hover {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-        }
-
-        .nav-tab.active {
-            background: var(--accent-purple);
-            color: white;
-        }
-
-        .main-content {
-            padding: 2rem;
-        }
-
-        .card {
-            background: var(--bg-primary);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: var(--shadow-md);
-            border: 1px solid var(--border-color);
-        }
-
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: var(--text-primary);
-        }
-
-        .journal-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .slider-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .slider-label {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
-        .slider-value {
-            font-weight: 600;
-            color: var(--accent-purple);
-            font-size: 1.1rem;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            background: var(--bg-tertiary);
-            outline: none;
-            appearance: none;
-            -webkit-appearance: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--accent-purple);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-            background: var(--accent-purple-light);
-        }
-
-        input[type="range"]::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--accent-purple);
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s;
-        }
-
-        textarea {
-            width: 100%;
-            min-height: 100px;
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-family: inherit;
-            font-size: 0.95rem;
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            resize: vertical;
-            transition: all 0.2s;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: var(--accent-purple);
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
-        }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            justify-content: center;
-        }
-
-        .btn-primary {
-            background: var(--accent-purple);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--accent-purple-light);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .btn-secondary {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-        }
-
-        .btn-secondary:hover {
-            background: var(--bg-tertiary);
-        }
-
-        .grid {
-            display: grid;
-            gap: 1.5rem;
-        }
-
-        .grid-2 {
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        }
-
-        .grid-3 {
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        }
-
-        .stat-card {
-            background: var(--bg-secondary);
-            padding: 1.25rem;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-        }
-
-        .stat-label {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .stat-icon {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .risk-badge {
-            display: inline-block;
-            padding: 0.5rem 1rem;
+        .glass-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
             border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.85rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
-        .risk-low {
-            background: var(--success-bg);
-            color: var(--success-text);
+        .dark-mode .glass-card {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .risk-medium {
-            background: var(--warning-bg);
-            color: var(--warning-text);
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .risk-high {
-            background: var(--danger-bg);
-            color: var(--danger-text);
+        .dark-mode .gradient-text {
+            background: linear-gradient(135deg, #a78bfa 0%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .alert {
-            padding: 1rem 1.25rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            display: flex;
-            gap: 1rem;
-            align-items: start;
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
         }
 
-        .alert-warning {
-            background: var(--warning-bg);
-            color: var(--warning-text);
-            border-left: 4px solid var(--warning-text);
-        }
-
-        .alert-danger {
-            background: var(--danger-bg);
-            color: var(--danger-text);
-            border-left: 4px solid var(--danger-text);
-        }
-
-        .alert-info {
-            background: #EEF2FF;
-            color: #4F46E5;
-            border-left: 4px solid #4F46E5;
-        }
-
-        [data-theme="dark"] .alert-info {
-            background: #312E81;
-            color: #C7D2FE;
-        }
-
-        .peer-rooms {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .room-card {
-            background: var(--bg-secondary);
-            padding: 1.25rem;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .room-card:hover {
-            border-color: var(--accent-purple);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .room-title {
-            font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-        }
-
-        .room-meta {
-            display: flex;
-            gap: 1rem;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        .chat-container {
-            display: flex;
-            flex-direction: column;
-            height: 500px;
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .chat-header {
-            padding: 1rem 1.5rem;
-            background: var(--accent-purple);
-            color: white;
-            font-weight: 600;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .message {
-            max-width: 80%;
-            padding: 0.75rem 1rem;
-            border-radius: 12px;
-            animation: messageSlide 0.3s ease;
-        }
-
-        @keyframes messageSlide {
+        @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(30px);
             }
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
-        }
-
-        .message-self {
-            align-self: flex-end;
-            background: var(--accent-purple);
-            color: white;
-            border-bottom-right-radius: 4px;
-        }
-
-        .message-other {
-            align-self: flex-start;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            border-bottom-left-radius: 4px;
-        }
-
-        .message-author {
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            opacity: 0.9;
-        }
-
-        .chat-input-container {
-            padding: 1rem 1.5rem;
-            background: var(--bg-primary);
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            gap: 0.75rem;
-        }
-
-        .chat-input {
-            flex: 1;
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            font-family: inherit;
-        }
-
-        .chat-input:focus {
-            outline: none;
-            border-color: var(--accent-purple);
-        }
-
-        .timeline-container {
-            background: var(--bg-primary);
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-top: 1.5rem;
-        }
-
-        .entry-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .entry-card {
-            background: var(--bg-secondary);
-            padding: 1.25rem;
-            border-radius: 10px;
-            border-left: 4px solid var(--accent-teal);
-        }
-
-        .entry-date {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-        }
-
-        .entry-metrics {
-            display: flex;
-            gap: 1.5rem;
-            margin-top: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .entry-metric {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        .metric-label {
-            color: var(--text-secondary);
-        }
-
-        .metric-value {
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .helpline-card {
-            background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
-            color: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-top: 1.5rem;
-        }
-
-        .helpline-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .helpline-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .helpline-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-        }
-
-        .helpline-number {
-            font-weight: 600;
-            font-size: 1.1rem;
         }
 
         .fade-in {
-            animation: fadeIn 0.5s ease;
+            animation: fadeIn 0.6s ease-out;
         }
 
         @keyframes fadeIn {
-            from {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .glow-button {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .glow-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .glow-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .glow-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .mood-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to right, #ef4444, #f59e0b, #10b981);
+            outline: none;
+        }
+
+        .mood-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        .mood-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .energy-slider {
+            background: linear-gradient(to right, #3b82f6, #8b5cf6, #ec4899);
+        }
+
+        .stress-slider {
+            background: linear-gradient(to right, #10b981, #f59e0b, #ef4444);
+        }
+
+        .chat-bubble {
+            animation: bubble-in 0.4s ease-out;
+        }
+
+        @keyframes bubble-in {
+            0% {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: scale(0.8) translateY(20px);
             }
-            to {
+            100% {
                 opacity: 1;
-                transform: translateY(0);
+                transform: scale(1) translateY(0);
             }
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 3rem 1rem;
-            color: var(--text-secondary);
+        .stat-card-hover {
+            transition: all 0.3s;
         }
 
-        .empty-state-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
+        .stat-card-hover:hover {
+            transform: translateY(-5px) scale(1.02);
         }
 
-        .disclaimer {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1rem;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-top: 1.5rem;
-            line-height: 1.6;
+        .room-card-hover {
+            transition: all 0.3s;
+            cursor: pointer;
         }
 
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
-            }
+        .room-card-hover:hover {
+            transform: scale(1.02);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
 
-            .nav-tabs {
-                width: 100%;
-                justify-content: space-around;
-            }
+        .message-gradient-self {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
 
-            .nav-tab {
-                padding: 0.5rem 1rem;
-                font-size: 0.85rem;
-            }
+        .message-gradient-other {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+        }
 
-            .main-content {
-                padding: 1rem;
-            }
+        .dark-mode .message-gradient-other {
+            background: rgba(0, 0, 0, 0.3);
+        }
 
-            .grid-2, .grid-3 {
-                grid-template-columns: 1fr;
+        .risk-badge-glow {
+            animation: risk-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes risk-glow {
+            0%, 100% { box-shadow: 0 0 10px currentColor; }
+            50% { box-shadow: 0 0 20px currentColor; }
+        }
+
+        /* Login Page Animations */
+        .login-float {
+            animation: loginFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes loginFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        .bounce-in {
+            animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .input-glow:focus {
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+            border-color: #667eea;
+        }
+
+        /* Pomodoro Timer */
+        .timer-circle {
+            stroke-dasharray: 283;
+            stroke-dashoffset: 283;
+            transition: stroke-dashoffset 1s linear;
+        }
+
+        /* Remove floating animation from emojis */
+        .stat-emoji {
+            font-size: 3rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float-particle 20s infinite;
+        }
+
+        @keyframes float-particle {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
             }
         }
     </style>
 </head>
-<body>
-    <div id="root"></div>
-    <script>
-  window.Recharts = window.Recharts || {};
-    </script>
+<body class="light-mode">
+    <!-- Floating Particles Background -->
+    <div class="particles" id="particles"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-        const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
+    <!-- Login Section -->
+    <div id="authSection" class="min-h-screen flex items-center justify-center p-4">
+        <div class="glass-card p-8 max-w-md w-full bounce-in">
+            <div class="text-center mb-8">
+                <div class="text-6xl mb-4 login-float">🧠</div>
+                <h1 class="text-4xl font-bold gradient-text mb-2">MindSync</h1>
+                <p class="text-white text-sm opacity-80">Your mental wellness companion</p>
+            </div>
 
-        // Simulated sentiment analysis (placeholder for Python backend)
-        const analyzeSentiment = (text) => {
-            const negativeWords = ['sad', 'depressed', 'anxious', 'stressed', 'overwhelmed', 'tired', 'exhausted', 'hopeless', 'alone', 'worried'];
-            const positiveWords = ['happy', 'good', 'great', 'better', 'relaxed', 'calm', 'peaceful', 'excited', 'motivated'];
-            
-            const lowerText = text.toLowerCase();
-            let score = 0.5;
-            
-            negativeWords.forEach(word => {
-                if (lowerText.includes(word)) score -= 0.1;
-            });
-            
-            positiveWords.forEach(word => {
-                if (lowerText.includes(word)) score += 0.1;
-            });
-            
-            return Math.max(0, Math.min(1, score));
-        };
+            <div class="space-y-4">
+                <div>
+                    <label class="text-white text-sm font-medium block mb-2">Email</label>
+                    <input 
+                        id="email" 
+                        type="email"
+                        placeholder="your.email@college.edu" 
+                        class="w-full p-3 rounded-xl bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-50 border-2 border-transparent input-glow focus:outline-none transition-all"
+                    >
+                </div>
+                <div>
+                    <label class="text-white text-sm font-medium block mb-2">Password</label>
+                    <input 
+                        id="password" 
+                        type="password"
+                        placeholder="••••••••" 
+                        class="w-full p-3 rounded-xl bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-50 border-2 border-transparent input-glow focus:outline-none transition-all"
+                    >
+                </div>
+                <div>
+                    <label class="text-white text-sm font-medium block mb-2">Display Name</label>
+                    <input 
+                        id="displayName" 
+                        type="text"
+                        placeholder="Your name (for chat)" 
+                        class="w-full p-3 rounded-xl bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-50 border-2 border-transparent input-glow focus:outline-none transition-all"
+                    >
+                </div>
 
-        const calculateBurnoutRisk = (entries) => {
-            if (entries.length < 3) return 'LOW';
-            
-            const recentEntries = entries.slice(-7);
-            const avgMood = recentEntries.reduce((sum, e) => sum + e.mood, 0) / recentEntries.length;
-            const avgEnergy = recentEntries.reduce((sum, e) => sum + e.energy, 0) / recentEntries.length;
-            const avgStress = recentEntries.reduce((sum, e) => sum + e.stress, 0) / recentEntries.length;
-            const avgSentiment = recentEntries.reduce((sum, e) => sum + (e.sentiment || 0.5), 0) / recentEntries.length;
-            
-            const riskScore = (10 - avgMood) + (10 - avgEnergy) + avgStress + ((1 - avgSentiment) * 10);
-            
-            if (riskScore > 25) return 'HIGH';
-            if (riskScore > 15) return 'MEDIUM';
-            return 'LOW';
-        };
+                <button onclick="login()" class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-purple-500 to-pink-500 glow-button">
+                    Login ✨
+                </button>
+                <button onclick="signup()" class="w-full py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-teal-500 to-blue-500 glow-button">
+                    Create Account 🚀
+                </button>
+            </div>
 
-        function App() {
-            const [theme, setTheme] = useState('light');
-            const [activeTab, setActiveTab] = useState('journal');
-            const [journalEntries, setJournalEntries] = useState([]);
-            const [currentEntry, setCurrentEntry] = useState({
-                mood: 5,
-                energy: 5,
-                stress: 5,
-                text: ''
-            });
-            const [activeRoom, setActiveRoom] = useState(null);
-            const [chatMessages, setChatMessages] = useState([]);
-            const [chatInput, setChatInput] = useState('');
-            const [anonName, setAnonName] = useState('');
+            <p class="text-center text-white text-xs opacity-70 mt-6">
+                🔒 Your data is private and secure
+            </p>
+        </div>
+    </div>
 
-            useEffect(() => {
-                document.documentElement.setAttribute('data-theme', theme);
-            }, [theme]);
+    <!-- Main App -->
+    <div id="app" class="min-h-screen" style="display:none;">
+        <!-- Header -->
+        <header class="glass-card mx-4 mt-4 mb-6 p-4 sticky top-4 z-50 slide-in">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-2xl">
+                        🧠
+                    </div>
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold gradient-text">MindSync</h1>
+                        <p class="text-white text-xs opacity-70" id="userWelcome"></p>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button id="themeToggle" class="w-10 h-10 rounded-full glass-card flex items-center justify-center text-xl glow-button">
+                        ☀️
+                    </button>
+                    <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500 text-white font-bold hover:bg-red-600 text-sm">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </header>
 
-            useEffect(() => {
-                // Generate anonymous name
-                const colors = ['Blue', 'Purple', 'Teal', 'Coral', 'Pink', 'Amber'];
-                const objects = ['Moon', 'Star', 'Cloud', 'Wave', 'Leaf', 'Spark'];
-                const randomColor = colors[Math.floor(Math.random() * colors.length)];
-                const randomObject = objects[Math.floor(Math.random() * objects.length)];
-                const randomNum = Math.floor(Math.random() * 100);
-                setAnonName(`${randomColor}${randomObject}${randomNum}`);
+        <!-- Navigation Tabs -->
+        <nav class="glass-card mx-4 mb-6 p-2 flex gap-2 overflow-x-auto fade-in">
+            <button onclick="switchTab('journal')" id="tab-journal" class="tab-btn flex-1 px-4 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-purple-500 to-pink-500 transition-all text-sm">
+                📓 Journal
+            </button>
+            <button onclick="switchTab('timeline')" id="tab-timeline" class="tab-btn flex-1 px-4 py-3 rounded-xl font-semibold text-white opacity-60 hover:opacity-100 transition-all text-sm">
+                📊 Timeline
+            </button>
+            <button onclick="switchTab('peer')" id="tab-peer" class="tab-btn flex-1 px-4 py-3 rounded-xl font-semibold text-white opacity-60 hover:opacity-100 transition-all text-sm">
+                👥 Peer Support
+            </button>
+            <button onclick="switchTab('study')" id="tab-study" class="tab-btn flex-1 px-4 py-3 rounded-xl font-semibold text-white opacity-60 hover:opacity-100 transition-all text-sm">
+                📚 Study Tools
+            </button>
+        </nav>
 
-                // Load sample data
-                const sampleEntries = [
-                    {
-                        id: 1,
-                        date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-                        mood: 7,
-                        energy: 6,
-                        stress: 4,
-                        text: 'Feeling okay today. Had a good study session.',
-                        sentiment: 0.7
-                    },
-                    {
-                        id: 2,
-                        date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-                        mood: 5,
-                        energy: 4,
-                        stress: 7,
-                        text: 'Stressed about upcoming exams. Feeling overwhelmed.',
-                        sentiment: 0.3
-                    },
-                    {
-                        id: 3,
-                        date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-                        mood: 6,
-                        energy: 5,
-                        stress: 6,
-                        text: 'Better than yesterday but still anxious.',
-                        sentiment: 0.5
-                    }
-                ];
-                setJournalEntries(sampleEntries);
-            }, []);
+        <!-- Content Sections -->
+        <main class="mx-4 pb-8">
+            <!-- Journal Tab -->
+            <div id="section-journal" class="tab-section">
+                <!-- Alert Banner -->
+                <div id="alertBanner" class="hidden glass-card p-4 mb-6 border-l-4 slide-in">
+                    <div class="flex items-start gap-3">
+                        <span class="text-2xl">⚠️</span>
+                        <div>
+                            <h3 class="font-bold text-white mb-1">We noticed you might be experiencing high stress</h3>
+                            <p class="text-white text-sm opacity-90">Consider taking a break, talking to a friend, or joining a peer support room. You're not alone in this.</p>
+                        </div>
+                    </div>
+                </div>
 
-            const toggleTheme = () => {
-                setTheme(theme === 'light' ? 'dark' : 'light');
-            };
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="glass-card p-6 stat-card-hover">
+                        <div class="stat-emoji">😊</div>
+                        <div class="text-sm text-white opacity-70 mb-1">Current Mood</div>
+                        <div class="text-4xl font-bold text-white" id="currentMood">5/10</div>
+                    </div>
+                    <div class="glass-card p-6 stat-card-hover">
+                        <div class="stat-emoji">⚡</div>
+                        <div class="text-sm text-white opacity-70 mb-1">Energy Level</div>
+                        <div class="text-4xl font-bold text-white" id="currentEnergy">5/10</div>
+                    </div>
+                    <div class="glass-card p-6 stat-card-hover">
+                        <div class="stat-emoji">😰</div>
+                        <div class="text-sm text-white opacity-70 mb-1">Stress Level</div>
+                        <div class="text-4xl font-bold text-white" id="currentStress">5/10</div>
+                    </div>
+                </div>
 
-            const handleSliderChange = (field, value) => {
-                setCurrentEntry({ ...currentEntry, [field]: parseInt(value) });
-            };
-
-            const handleTextChange = (e) => {
-                setCurrentEntry({ ...currentEntry, text: e.target.value });
-            };
-
-            const submitJournalEntry = () => {
-                if (!currentEntry.text.trim()) {
-                    alert('Please write something in your journal entry');
-                    return;
-                }
-
-                const sentiment = analyzeSentiment(currentEntry.text);
-                const newEntry = {
-                    id: journalEntries.length + 1,
-                    date: new Date().toISOString(),
-                    ...currentEntry,
-                    sentiment
-                };
-
-                setJournalEntries([...journalEntries, newEntry]);
-                setCurrentEntry({ mood: 5, energy: 5, stress: 5, text: '' });
-                alert('Journal entry saved! 🎉');
-            };
-
-            const joinRoom = (room) => {
-                setActiveRoom(room);
-                setChatMessages([
-                    { id: 1, author: 'TealStar23', text: 'Hey everyone, dealing with exam stress too 😓', isOwn: false },
-                    { id: 2, author: 'PurpleLeaf56', text: 'Same here! What subjects are you worried about?', isOwn: false }
-                ]);
-            };
-
-            const leaveRoom = () => {
-                setActiveRoom(null);
-                setChatMessages([]);
-                setChatInput('');
-            };
-
-            const sendMessage = () => {
-                if (!chatInput.trim()) return;
-
-                const newMessage = {
-                    id: chatMessages.length + 1,
-                    author: anonName,
-                    text: chatInput,
-                    isOwn: true
-                };
-
-                setChatMessages([...chatMessages, newMessage]);
-                setChatInput('');
-
-                // Simulate response
-                setTimeout(() => {
-                    const responses = [
-                        'I totally understand how you feel 💜',
-                        'Have you tried the Pomodoro technique? It helps me a lot!',
-                        'Remember to take breaks! You\'re doing great 🌟',
-                        'We\'re all in this together. You\'ve got this!'
-                    ];
-                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                    setChatMessages(prev => [...prev, {
-                        id: prev.length + 1,
-                        author: 'CoralWave89',
-                        text: randomResponse,
-                        isOwn: false
-                    }]);
-                }, 1500);
-            };
-
-            const burnoutRisk = calculateBurnoutRisk(journalEntries);
-            const chartData = journalEntries.map(entry => ({
-                date: new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-                mood: entry.mood,
-                energy: entry.energy,
-                stress: entry.stress
-            }));
-
-            const peerRooms = [
-                { id: 1, title: '📚 Exam Stress Support', members: 12, description: 'Share tips and encouragement for exam preparation' },
-                { id: 2, title: '👨‍👩‍👧 Family Pressure', members: 8, description: 'Discuss challenges with family expectations' },
-                { id: 3, title: '🎭 Imposter Syndrome', members: 15, description: 'You belong here - let\'s talk about it' },
-                { id: 4, title: '😔 Feeling Lonely', members: 6, description: 'Connect with others who understand' },
-                { id: 5, title: '💪 Motivation & Goals', members: 20, description: 'Share your wins and stay motivated together' }
-            ];
-
-            return (
-                <div className="app-container">
-                    <header className="header">
-                        <div className="header-content">
-                            <div className="logo">
-                                <div className="logo-icon">🧠</div>
-                                <span>MindSync</span>
+                <!-- Journal Entry Form -->
+                <div class="glass-card p-6 mb-6 slide-in">
+                    <h2 class="text-2xl font-bold text-white mb-6">Daily Check-in</h2>
+                    
+                    <div class="space-y-6">
+                        <!-- Mood Slider -->
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <label class="text-white font-medium">How are you feeling today?</label>
+                                <span class="text-white font-bold text-lg" id="moodValue">5/10</span>
                             </div>
-                            <div className="header-actions">
-                                <nav className="nav-tabs">
-                                    <button 
-                                        className={`nav-tab ${activeTab === 'journal' ? 'active' : ''}`}
-                                        onClick={() => setActiveTab('journal')}
-                                    >
-                                        📓 Journal
-                                    </button>
-                                    <button 
-                                        className={`nav-tab ${activeTab === 'timeline' ? 'active' : ''}`}
-                                        onClick={() => setActiveTab('timeline')}
-                                    >
-                                        📊 Timeline
-                                    </button>
-                                    <button 
-                                        className={`nav-tab ${activeTab === 'peer' ? 'active' : ''}`}
-                                        onClick={() => setActiveTab('peer')}
-                                    >
-                                        👥 Peer Support
-                                    </button>
-                                </nav>
-                                <button className="theme-toggle" onClick={toggleTheme}>
-                                    {theme === 'light' ? '🌙' : '☀️'}
-                                </button>
+                            <input type="range" min="1" max="10" value="5" class="mood-slider w-full" id="moodSlider">
+                        </div>
+
+                        <!-- Energy Slider -->
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <label class="text-white font-medium">What's your energy level?</label>
+                                <span class="text-white font-bold text-lg" id="energyValue">5/10</span>
+                            </div>
+                            <input type="range" min="1" max="10" value="5" class="energy-slider w-full" id="energySlider">
+                        </div>
+
+                        <!-- Stress Slider -->
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <label class="text-white font-medium">How stressed are you?</label>
+                                <span class="text-white font-bold text-lg" id="stressValue">5/10</span>
+                            </div>
+                            <input type="range" min="1" max="10" value="5" class="stress-slider w-full" id="stressSlider">
+                        </div>
+
+                        <!-- Text Area -->
+                        <div>
+                            <label class="text-white font-medium block mb-2">What's on your mind? (optional)</label>
+                            <textarea 
+                                id="journalText" 
+                                class="w-full h-32 p-4 rounded-xl glass-card text-white placeholder-white placeholder-opacity-50 resize-none focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                placeholder="Write a quick note about your day..."
+                            ></textarea>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button onclick="submitJournalEntry()" class="w-full py-4 px-6 rounded-xl font-bold text-lg text-white bg-gradient-to-r from-purple-500 to-pink-500 glow-button">
+                            Save Entry ✨
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Disclaimer -->
+                <div class="glass-card p-4 mb-6">
+                    <p class="text-sm text-white opacity-80">
+                        <strong>📌 Important:</strong> MindSync is a supportive tool for students but is not a replacement for professional mental health care. If you're experiencing severe distress, please reach out to a counselor, therapist, or the helplines listed below.
+                    </p>
+                </div>
+
+                <!-- Crisis Helplines -->
+                <div class="glass-card p-6 bg-gradient-to-r from-red-500 to-pink-500">
+                    <h3 class="text-xl font-bold text-white mb-4">🆘 Crisis Support Helplines (India)</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center bg-white bg-opacity-20 rounded-lg p-3">
+                            <span class="text-white font-medium">iCall Helpline</span>
+                            <a href="tel:9152987821" class="text-white font-bold text-lg hover:underline">9152987821</a>
+                        </div>
+                        <div class="flex justify-between items-center bg-white bg-opacity-20 rounded-lg p-3">
+                            <span class="text-white font-medium">Vandrevala Foundation</span>
+                            <a href="tel:18602662345" class="text-white font-bold text-lg hover:underline">1860 2662 345</a>
+                        </div>
+                        <div class="flex justify-between items-center bg-white bg-opacity-20 rounded-lg p-3">
+                            <span class="text-white font-medium">AASRA</span>
+                            <a href="tel:9820466726" class="text-white font-bold text-lg hover:underline">9820466726</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline Tab -->
+            <div id="section-timeline" class="tab-section hidden">
+                <div class="glass-card p-6 mb-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-white">Your Mental Health Journey</h2>
+                        <div id="riskBadge" class="px-4 py-2 rounded-full font-bold text-sm risk-badge-glow">
+                            LOW RISK
+                        </div>
+                    </div>
+
+                    <!-- Chart -->
+                    <div class="bg-white bg-opacity-10 rounded-xl p-4 mb-6">
+                        <canvas id="moodChart" height="100"></canvas>
+                    </div>
+
+                    <!-- Recent Entries -->
+                    <div id="entriesList" class="space-y-4"></div>
+                </div>
+            </div>
+
+            <!-- Peer Support Tab -->
+            <div id="section-peer" class="tab-section hidden">
+                <div id="roomList">
+                    <!-- Anonymous Badge -->
+                    <div class="glass-card p-4 mb-6 border-l-4 border-blue-500">
+                        <div class="flex items-start gap-3">
+                            <span class="text-2xl">🔒</span>
+                            <div>
+                                <h3 class="font-bold text-white mb-1">Anonymous & Safe</h3>
+                                <p class="text-white text-sm opacity-90">You'll join as <strong id="anonName"></strong>. Your identity is protected. Be kind, be supportive.</p>
                             </div>
                         </div>
-                    </header>
+                    </div>
 
-                    <main className="main-content">
-                        {activeTab === 'journal' && (
-                            <div className="fade-in">
-                                {burnoutRisk === 'HIGH' && (
-                                    <div className="alert alert-danger">
-                                        <div>
-                                            <strong>⚠️ We noticed you might be experiencing high stress</strong>
-                                            <p style={{ marginTop: '0.5rem' }}>Consider taking a break, talking to a friend, or joining a peer support room. You're not alone in this.</p>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {burnoutRisk === 'MEDIUM' && (
-                                    <div className="alert alert-warning">
-                                        <div>
-                                            <strong>💡 Gentle reminder</strong>
-                                            <p style={{ marginTop: '0.5rem' }}>Your stress levels have been elevated. Remember to take care of yourself - maybe go for a walk or chat with friends?</p>
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="grid grid-3">
-                                    <div className="stat-card">
-                                        <div className="stat-icon">😊</div>
-                                        <div className="stat-label">Current Mood</div>
-                                        <div className="stat-value">{currentEntry.mood}/10</div>
-                                    </div>
-                                    <div className="stat-card">
-                                        <div className="stat-icon">⚡</div>
-                                        <div className="stat-label">Energy Level</div>
-                                        <div className="stat-value">{currentEntry.energy}/10</div>
-                                    </div>
-                                    <div className="stat-card">
-                                        <div className="stat-icon">😰</div>
-                                        <div className="stat-label">Stress Level</div>
-                                        <div className="stat-value">{currentEntry.stress}/10</div>
-                                    </div>
-                                </div>
-
-                                <div className="card" style={{ marginTop: '1.5rem' }}>
-                                    <h2 className="card-title">Daily Check-in</h2>
-                                    <div className="journal-form">
-                                        <div className="slider-group">
-                                            <div className="slider-label">
-                                                <span>How are you feeling today?</span>
-                                                <span className="slider-value">{currentEntry.mood}/10</span>
-                                            </div>
-                                            <input 
-                                                type="range" 
-                                                min="1" 
-                                                max="10" 
-                                                value={currentEntry.mood}
-                                                onChange={(e) => handleSliderChange('mood', e.target.value)}
-                                            />
-                                        </div>
-
-                                        <div className="slider-group">
-                                            <div className="slider-label">
-                                                <span>What's your energy level?</span>
-                                                <span className="slider-value">{currentEntry.energy}/10</span>
-                                            </div>
-                                            <input 
-                                                type="range" 
-                                                min="1" 
-                                                max="10" 
-                                                value={currentEntry.energy}
-                                                onChange={(e) => handleSliderChange('energy', e.target.value)}
-                                            />
-                                        </div>
-
-                                        <div className="slider-group">
-                                            <div className="slider-label">
-                                                <span>How stressed are you?</span>
-                                                <span className="slider-value">{currentEntry.stress}/10</span>
-                                            </div>
-                                            <input 
-                                                type="range" 
-                                                min="1" 
-                                                max="10" 
-                                                value={currentEntry.stress}
-                                                onChange={(e) => handleSliderChange('stress', e.target.value)}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                                                What's on your mind? (optional)
-                                            </label>
-                                            <textarea 
-                                                placeholder="Write a quick note about your day..."
-                                                value={currentEntry.text}
-                                                onChange={handleTextChange}
-                                            />
-                                        </div>
-
-                                        <button className="btn btn-primary" onClick={submitJournalEntry}>
-                                            Save Entry ✨
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="disclaimer">
-                                    <strong>📌 Important:</strong> MindSync is a supportive tool for students but is not a replacement for professional mental health care. If you're experiencing severe distress, please reach out to a counselor, therapist, or the helplines listed below.
-                                </div>
-
-                                <div className="helpline-card">
-                                    <div className="helpline-title">🆘 Crisis Support Helplines (India)</div>
-                                    <div className="helpline-list">
-                                        <div className="helpline-item">
-                                            <span>iCall Helpline</span>
-                                            <a href="tel:9152987821" className="helpline-number" style={{ color: 'white', textDecoration: 'none' }}>9152987821</a>
-                                        </div>
-                                        <div className="helpline-item">
-                                            <span>Vandrevala Foundation</span>
-                                            <a href="tel:18602662345" className="helpline-number" style={{ color: 'white', textDecoration: 'none' }}>1860 2662 345</a>
-                                        </div>
-                                        <div className="helpline-item">
-                                            <span>AASRA</span>
-                                            <a href="tel:9820466726" className="helpline-number" style={{ color: 'white', textDecoration: 'none' }}>9820466726</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {activeTab === 'timeline' && (
-                            <div className="fade-in">
-                                <div className="card">
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h2 className="card-title" style={{ margin: 0 }}>Your Mental Health Journey</h2>
-                                        <div className={`risk-badge risk-${burnoutRisk.toLowerCase()}`}>
-                                            {burnoutRisk} Risk
-                                        </div>
-                                    </div>
-
-                                    {journalEntries.length > 0 ? (
-                                        <>
-                                            <div style={{ height: '400px', marginTop: '1.5rem' }}>
-                                                <ResponsiveContainer width="100%" height="100%">
-                                                    <LineChart data={chartData}>
-                                                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-                                                        <XAxis 
-                                                            dataKey="date" 
-                                                            stroke="var(--text-secondary)"
-                                                            style={{ fontSize: '0.85rem' }}
-                                                        />
-                                                        <YAxis 
-                                                            stroke="var(--text-secondary)"
-                                                            style={{ fontSize: '0.85rem' }}
-                                                        />
-                                                        <Tooltip 
-                                                            contentStyle={{
-                                                                backgroundColor: 'var(--bg-primary)',
-                                                                border: '1px solid var(--border-color)',
-                                                                borderRadius: '8px',
-                                                                color: 'var(--text-primary)'
-                                                            }}
-                                                        />
-                                                        <Legend />
-                                                        <Line 
-                                                            type="monotone" 
-                                                            dataKey="mood" 
-                                                            stroke="#7C3AED" 
-                                                            strokeWidth={3}
-                                                            name="Mood"
-                                                        />
-                                                        <Line 
-                                                            type="monotone" 
-                                                            dataKey="energy" 
-                                                            stroke="#14B8A6" 
-                                                            strokeWidth={3}
-                                                            name="Energy"
-                                                        />
-                                                        <Line 
-                                                            type="monotone" 
-                                                            dataKey="stress" 
-                                                            stroke="#F97316" 
-                                                            strokeWidth={3}
-                                                            name="Stress"
-                                                        />
-                                                    </LineChart>
-                                                </ResponsiveContainer>
-                                            </div>
-
-                                            <div className="entry-list" style={{ marginTop: '2rem' }}>
-                                                <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Recent Entries</h3>
-                                                {journalEntries.slice().reverse().map(entry => (
-                                                    <div key={entry.id} className="entry-card">
-                                                        <div className="entry-date">
-                                                            {new Date(entry.date).toLocaleDateString('en-US', { 
-                                                                weekday: 'long', 
-                                                                year: 'numeric', 
-                                                                month: 'long', 
-                                                                day: 'numeric' 
-                                                            })}
-                                                        </div>
-                                                        <p style={{ color: 'var(--text-primary)', marginTop: '0.5rem' }}>
-                                                            {entry.text}
-                                                        </p>
-                                                        <div className="entry-metrics">
-                                                            <div className="entry-metric">
-                                                                <span className="metric-label">Mood:</span>
-                                                                <span className="metric-value">{entry.mood}/10</span>
-                                                            </div>
-                                                            <div className="entry-metric">
-                                                                <span className="metric-label">Energy:</span>
-                                                                <span className="metric-value">{entry.energy}/10</span>
-                                                            </div>
-                                                            <div className="entry-metric">
-                                                                <span className="metric-label">Stress:</span>
-                                                                <span className="metric-value">{entry.stress}/10</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <div className="empty-state">
-                                            <div className="empty-state-icon">📊</div>
-                                            <p>No entries yet. Start journaling to see your mood trends!</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-
-                        {activeTab === 'peer' && (
-                            <div className="fade-in">
-                                {!activeRoom ? (
-                                    <>
-                                        <div className="alert alert-info">
-                                            <div>
-                                                <strong>🔒 Anonymous & Safe</strong>
-                                                <p style={{ marginTop: '0.5rem' }}>You'll join as <strong>{anonName}</strong>. Your identity is protected. Be kind, be supportive.</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="card">
-                                            <h2 className="card-title">Peer Support Rooms</h2>
-                                            <div className="peer-rooms">
-                                                {peerRooms.map(room => (
-                                                    <div 
-                                                        key={room.id} 
-                                                        className="room-card"
-                                                        onClick={() => joinRoom(room)}
-                                                    >
-                                                        <div className="room-title">{room.title}</div>
-                                                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: '0.5rem 0' }}>
-                                                            {room.description}
-                                                        </p>
-                                                        <div className="room-meta">
-                                                            <span>👥 {room.members} online</span>
-                                                            <span>🟢 Active now</span>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <div className="card">
-                                        <div className="chat-container">
-                                            <div className="chat-header">
-                                                <span>{activeRoom.title}</span>
-                                                <button 
-                                                    className="btn-secondary" 
-                                                    style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
-                                                    onClick={leaveRoom}
-                                                >
-                                                    Leave Room
-                                                </button>
-                                            </div>
-                                            <div className="chat-messages">
-                                                {chatMessages.map(msg => (
-                                                    <div 
-                                                        key={msg.id} 
-                                                        className={`message ${msg.isOwn ? 'message-self' : 'message-other'}`}
-                                                    >
-                                                        {!msg.isOwn && (
-                                                            <div className="message-author">{msg.author}</div>
-                                                        )}
-                                                        <div>{msg.text}</div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            <div className="chat-input-container">
-                                                <input 
-                                                    type="text" 
-                                                    className="chat-input"
-                                                    placeholder="Type your message..."
-                                                    value={chatInput}
-                                                    onChange={(e) => setChatInput(e.target.value)}
-                                                    onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                                                />
-                                                <button className="btn btn-primary" onClick={sendMessage}>
-                                                    Send
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </main>
+                    <!-- Room Cards -->
+                    <h2 class="text-2xl font-bold text-white mb-4">Peer Support Rooms</h2>
+                    <div class="grid gap-4" id="peerRooms"></div>
                 </div>
-            );
+
+                <!-- Chat Interface (Hidden by default) -->
+                <div id="chatInterface" class="hidden glass-card overflow-hidden">
+                    <!-- Chat Header -->
+                    <div class="bg-gradient-to-r from-purple-500 to-pink-500 p-4 flex justify-between items-center">
+                        <div>
+                            <h3 class="text-white font-bold text-lg" id="chatRoomTitle"></h3>
+                            <p class="text-white text-xs opacity-80" id="activeUsersCount">0 users online</p>
+                        </div>
+                        <button onclick="leaveRoom()" class="px-4 py-2 bg-white bg-opacity-20 rounded-lg text-white font-medium hover:bg-opacity-30 transition">
+                            Leave Room
+                        </button>
+                    </div>
+
+                    <!-- Messages -->
+                    <div id="chatMessages" class="h-96 overflow-y-auto p-4 space-y-3 bg-white bg-opacity-5"></div>
+
+                    <!-- Input -->
+                    <div class="p-4 bg-white bg-opacity-10 flex gap-2">
+                        <input 
+                            type="text" 
+                            id="chatInput" 
+                            placeholder="Type your message..."
+                            class="flex-1 px-4 py-3 rounded-lg glass-card text-white placeholder-white placeholder-opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        >
+                        <button id="sendBtn" onclick="sendMessage()" class="px-6 py-3 rounded-lg font-bold text-white bg-gradient-to-r from-purple-500 to-pink-500 glow-button">
+                            Send
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Study Tools Tab (NEW!) -->
+            <div id="section-study" class="tab-section hidden">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Pomodoro Timer -->
+                    <div class="glass-card p-6">
+                        <h3 class="text-2xl font-bold text-white mb-4">🍅 Pomodoro Timer</h3>
+                        <div class="text-center">
+                            <svg class="mx-auto mb-4" width="200" height="200">
+                                <circle cx="100" cy="100" r="45" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="10"/>
+                                <circle id="timerCircle" class="timer-circle" cx="100" cy="100" r="45" fill="none" stroke="#a78bfa" stroke-width="10" transform="rotate(-90 100 100)"/>
+                            </svg>
+                            <div class="text-5xl font-bold text-white mb-4" id="timerDisplay">25:00</div>
+                            <div class="flex gap-2 justify-center">
+                                <button onclick="startPomodoro()" class="px-6 py-3 rounded-lg bg-green-500 text-white font-bold hover:bg-green-600">
+                                    Start
+                                </button>
+                                <button onclick="pausePomodoro()" class="px-6 py-3 rounded-lg bg-yellow-500 text-white font-bold hover:bg-yellow-600">
+                                    Pause
+                                </button>
+                                <button onclick="resetPomodoro()" class="px-6 py-3 rounded-lg bg-red-500 text-white font-bold hover:bg-red-600">
+                                    Reset
+                                </button>
+                            </div>
+                            <p class="text-white opacity-70 text-sm mt-4">Focus for 25 minutes, then take a 5-minute break!</p>
+                        </div>
+                    </div>
+
+                    <!-- Study Group Finder -->
+                    <div class="glass-card p-6">
+                        <h3 class="text-2xl font-bold text-white mb-4">📚 Study Group Finder</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="text-white text-sm mb-2 block">What are you studying?</label>
+                                <input 
+                                    type="text" 
+                                    id="studySubject" 
+                                    placeholder="e.g., Data Structures, Calculus..."
+                                    class="w-full p-3 rounded-lg glass-card text-white placeholder-white placeholder-opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                >
+                            </div>
+                            <button onclick="createStudyGroup()" class="w-full py-3 px-6 rounded-lg font-bold text-white bg-gradient-to-r from-teal-500 to-blue-500 glow-button">
+                                Create Study Group
+                            </button>
+                            <div id="studyGroups" class="space-y-2 mt-4"></div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Break Ideas -->
+                    <div class="glass-card p-6">
+                        <h3 class="text-2xl font-bold text-white mb-4">☕ Quick Break Ideas</h3>
+                        <div class="space-y-3">
+                            <div class="bg-white bg-opacity-10 p-3 rounded-lg">
+                                <p class="text-white font-medium">🚶 5-Minute Walk</p>
+                                <p class="text-white text-sm opacity-80">Get some fresh air and stretch your legs</p>
+                            </div>
+                            <div class="bg-white bg-opacity-10 p-3 rounded-lg">
+                                <p class="text-white font-medium">💧 Hydration Check</p>
+                                <p class="text-white text-sm opacity-80">Drink a glass of water</p>
+                            </div>
+                            <div class="bg-white bg-opacity-10 p-3 rounded-lg">
+                                <p class="text-white font-medium">🧘 1-Minute Meditation</p>
+                                <p class="text-white text-sm opacity-80">Close your eyes and breathe deeply</p>
+                            </div>
+                            <div class="bg-white bg-opacity-10 p-3 rounded-lg">
+                                <p class="text-white font-medium">🎵 Music Break</p>
+                                <p class="text-white text-sm opacity-80">Listen to your favorite song</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Task Priority Matrix -->
+                    <div class="glass-card p-6">
+                        <h3 class="text-2xl font-bold text-white mb-4">📋 Task Organizer</h3>
+                        <div class="space-y-3">
+                            <input 
+                                type="text" 
+                                id="taskInput" 
+                                placeholder="Add a task..."
+                                class="w-full p-3 rounded-lg glass-card text-white placeholder-white placeholder-opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            >
+                            <div class="flex gap-2">
+                                <select id="taskPriority" class="flex-1 p-3 rounded-lg glass-card text-white focus:outline-none">
+                                    <option value="urgent">🔴 Urgent & Important</option>
+                                    <option value="important">🟡 Important</option>
+                                    <option value="normal">🟢 Normal</option>
+                                </select>
+                                <button onclick="addTask()" class="px-6 py-3 rounded-lg bg-purple-500 text-white font-bold hover:bg-purple-600">
+                                    Add
+                                </button>
+                            </div>
+                            <div id="taskList" class="space-y-2 mt-4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ✅ Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAocdlCqPTlPZwJIC7EC7PQMh_YbRWFw0s",
+            authDomain: "mindsync-ec55a.firebaseapp.com",
+            databaseURL: "https://mindsync-ec55a-default-rtdb.firebaseio.com",
+            projectId: "mindsync-ec55a",
+            storageBucket: "mindsync-ec55a.firebasestorage.app",
+            messagingSenderId: "927873282730",
+            appId: "1:927873282730:web:631b0eafa707bfadd516d3"
+        };
+
+        // ✅ Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // ✅ Services
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // Global variables
+        let currentUser = null;
+        let currentUserName = '';
+
+        function signup() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const displayName = document.getElementById('displayName').value;
+
+            if (!email || !password || !displayName) {
+                alert('Please fill all fields!');
+                return;
+            }
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Save display name to database
+                    db.ref('users/' + userCredential.user.uid).set({
+                        displayName: displayName,
+                        email: email,
+                        createdAt: Date.now()
+                    });
+                    alert('Account created! ✅');
+                })
+                .catch(err => alert(err.message));
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
-    </script>
-</body>
-</html>
+        function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                alert('Please fill all fields!');
+                return;
+            }
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then(() => {
+                    console.log('Logged in successfully');
+                })
+                .catch(err => alert(err.message));
+        }
+
+        function logout() {
+            if (currentRoom) {
+                leaveRoom();
+            }
+            auth.signOut();
+        }
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                
+                // Get user's display name
+                db.ref('users/' + user.uid).once('value').then(snapshot => {
+                    const userData = snapshot.val();
+                    currentUserName = userData ? userData.displayName : 'Anonymous User';
+                    document.getElementById('userWelcome').textContent = 'Welcome, ' + currentUserName;
+                    document.getElementById('anonName').textContent = currentUserName;
+                });
+
+                // Load user's journal entries from Firebase
+                loadJournalEntries();
+
+                document.getElementById('authSection').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+            } else {
+                currentUser = null;
+                document.getElementById('authSection').style.display = 'flex';
+                document.getElementById('app').style.display = 'none';
+            }
+        });
+ 
+        // Initialize particles
+        function createParticles() {
+            const particles = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+                particles.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        let isDark = false;
+
+        themeToggle.addEventListener('click', () => {
+            isDark = !isDark;
+            document.body.className = isDark ? 'dark-mode' : 'light-mode';
+            themeToggle.textContent = isDark ? '🌙' : '☀️';
+        });
+
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-gradient-to-r', 'from-purple-500', 'to-pink-500');
+                btn.classList.add('opacity-60');
+            });
+
+            document.getElementById('section-' + tabName).classList.remove('hidden');
+
+            const activeTab = document.getElementById('tab-' + tabName);
+            activeTab.classList.add('bg-gradient-to-r', 'from-purple-500', 'to-pink-500');
+            activeTab.classList.remove('opacity-60');
+
+            if 
